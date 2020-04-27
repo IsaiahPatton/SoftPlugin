@@ -1,4 +1,5 @@
 /**
+ * Copyright (C) 2020 Isaiah Patton, Fungus Software
  * Copyright (C) 2016 Roy Adrian Curtis
  *
  * Permission is hereby granted, free of charge, to any person
@@ -40,8 +41,8 @@ import java.util.logging.Logger;
  */
 public class SoftPlugin extends JavaPlugin {
 
-    protected static SoftPlugin INSTANCE; // Singleton instance of SoftPlugin, as created and run by Bukkit
-    protected static Logger SOFTLOG; // Singleton instance of SoftPlugin's logger, provided by Bukkit
+    public static SoftPlugin INSTANCE; // Singleton instance of SoftPlugin, as created and run by Bukkit
+    public static Logger SOFTLOG; // Singleton instance of SoftPlugin's logger, provided by Bukkit
 
     private boolean running;
     private Diagnostics diagnostics;

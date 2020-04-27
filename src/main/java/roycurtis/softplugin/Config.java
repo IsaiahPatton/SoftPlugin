@@ -39,7 +39,7 @@ import static roycurtis.softplugin.SoftPlugin.SOFTLOG;
  */
 public class Config {
 
-    protected static class Dirs {
+    public static class Dirs {
         protected static Path source; // Directory where source files are to be found
         protected static Path cache; // Directory where compiled class files are to be stored
     }

@@ -24,15 +24,11 @@
  */
 package roycurtis.softplugin;
 
+import com.fungus_soft.utils.AbstractCompiler;
 import com.google.common.io.PatternFilenameFilter;
 import org.bukkit.Bukkit;
 
-import javax.tools.JavaCompiler;
-import javax.tools.JavaCompiler.CompilationTask;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
 import java.io.File;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -45,22 +41,18 @@ import static roycurtis.softplugin.SoftPlugin.SOFTLOG;
 /**
  * Pipeline class that handles the discovery and compilation of Java source files
  */
-class Compiler {
+public class Compiler {
 
     // Path to JAR that server's Bukkit API is running from, for classpath use
     private static final String BUKKIT_JAR = Bukkit.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
-    private JavaCompiler javac;
+    private AbstractCompiler javac;
     private Diagnostics diagnostics;
     private ArrayList<File> sourceFiles;
 
     Compiler(Diagnostics diagnostics) {
-        // See http://stackoverflow.com/a/6052010/3354920
-        this.javac = ToolProvider.getSystemJavaCompiler();
+        this.javac = new AbstractCompiler();
         this.diagnostics = diagnostics;
-
-        if (this.javac == null)
-            throw new RuntimeException("Could not get javac; is server running on JDK?");
 
         SOFTLOG.fine("Compiler created");
     }
@@ -121,10 +113,6 @@ class Compiler {
      * Attempts to compile all found source files into the cache directory, as class files
      */
     private void compileFiles() {
-        StandardJavaFileManager fileManager = javac.getStandardFileManager(diagnostics, null, Charset.forName("UTF-8"));
-
-        // See https://docs.oracle.com/javase/8/docs/technotes/tools/windows/javac.html
-        // and https://docs.oracle.com/javase/8/docs/technotes/tools/windows/classpath.html
         List<String> options = Arrays.asList(
             "-d", Config.Dirs.cache.toString(), // Built class output directory
             "-classpath", generateClasspath(),  // Use Bukkit + plugins as classpath
@@ -133,9 +121,7 @@ class Compiler {
 
         SOFTLOG.info("Compiling " + sourceFiles.size() + " source files. . .");
 
-        CompilationTask task = javac.getTask(null, fileManager, diagnostics, options, null, fileManager.getJavaFileObjectsFromFiles(sourceFiles));
-
-        if (!task.call())
+        if (!javac.compile(sourceFiles, options, diagnostics))
             throw new CompilerException();
     }
 
