@@ -1,7 +1,3 @@
-This project is abandoned, in favor of continuing with Bensku's Skript. It is not known
-if this project is a viable alternative. Try at your own risk.
-
-----
 
 SoftPlugin is a [Spigot plugin][0]. It is a thin loader; at runtime, it compiles Java
 source files and then loads a specific boot class. Whilst the server is running, the
