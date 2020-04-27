@@ -24,8 +24,5 @@
  */
 package roycurtis.softplugin;
 
-
-public class CompilerException extends RuntimeException
-{
-
+public class CompilerException extends RuntimeException {
 }

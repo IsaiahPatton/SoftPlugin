@@ -1,8 +1,8 @@
 name:        ${project.artifactId}
 version:     ${project.version}
 description: ${project.description}
-author:      RoyCurtis
-website:     https://github.com/Gamealition/SoftPlugin
+authors:     [RoyCurtis, Isaiah, Fungus Software]
+website:     https://github.com/IsaiahPatton/SoftPlugin
 main:        roycurtis.softplugin.SoftPlugin
 
 permissions:

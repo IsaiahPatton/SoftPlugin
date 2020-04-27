@@ -34,24 +34,21 @@ import java.net.URLClassLoader;
 import static roycurtis.softplugin.SoftPlugin.SOFTLOG;
 
 /** Handles the loading and execution of compiled classes. Holds sole reference to custom code */
-class Loader
-{
-    private URL[]          cacheUrl;
+class Loader {
+
+    private URL[] cacheUrl;
     private URLClassLoader loader;
 
     private Class<?> bootClass;
-    private Object   bootInstance;
+    private Object bootInstance;
 
-    Loader()
-    {
+    protected Loader() {
         SOFTLOG.fine("Loader created");
     }
 
     /** Uses a {@see URLClassLoader} to attempt to load & run the boot class from cache */
-    public void load()
-    {
-        try
-        {
+    public void load() {
+        try {
             cacheUrl = new URL[] { Config.Dirs.cache.toUri().toURL() };
             loader   = new URLClassLoader( cacheUrl, SoftPlugin.class.getClassLoader() );
 
@@ -61,38 +58,25 @@ class Loader
                 .newInstance(SoftPlugin.INSTANCE);
 
             SOFTLOG.fine("Loaded and created instance of boot class: " + bootInstance);
-        }
-        catch (MalformedURLException e)
-        {
+        } catch (MalformedURLException e) {
             throw new RuntimeException("Could not create cache path URL", e);
-        }
-        catch (ClassNotFoundException e)
-        {
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException("Could not find boot class: " + Config.Boot.className);
-        }
-        catch (NoSuchMethodException e)
-        {
+        } catch (NoSuchMethodException e) {
             throw new RuntimeException("Boot class lacks a valid constructor");
-        }
-        catch (InstantiationException e)
-        {
+        } catch (InstantiationException e) {
             throw new RuntimeException("Could not create boot class", e);
-        }
-        catch (IllegalAccessException e)
-        {
+        } catch (IllegalAccessException e) {
             throw new RuntimeException("Boot class' constructor is not set to public");
-        }
-        catch (InvocationTargetException e)
-        {
+        } catch (InvocationTargetException e) {
             e.getCause().printStackTrace();
             throw new RuntimeException("Exception thrown in boot class' constructor", e.getCause());
         }
     }
 
     @Override
-    protected void finalize() throws Throwable
-    {
-        bootClass    = null;
+    protected void finalize() throws Throwable {
+        bootClass = null;
         bootInstance = null;
 
         if (loader != null)
@@ -101,6 +85,5 @@ class Loader
         SOFTLOG.fine("Loader finalized; attempted cleanup of loaded instances");
         super.finalize();
     }
-
 
 }

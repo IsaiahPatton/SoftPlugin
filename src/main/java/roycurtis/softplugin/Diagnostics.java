@@ -31,17 +31,17 @@ import java.util.logging.Level;
 
 import static roycurtis.softplugin.SoftPlugin.SOFTLOG;
 
-/** Implementation of javac diagnostics handler. Reports warnings/errors to console */
-public class Diagnostics implements DiagnosticListener<JavaFileObject>
-{
+/**
+ * Implementation of javac diagnostics handler. Reports warnings/errors to console 
+ */
+public class Diagnostics implements DiagnosticListener<JavaFileObject> {
+
     @Override
-    public void report(Diagnostic<? extends JavaFileObject> event)
-    {
-        Level  level;
+    public void report(Diagnostic<? extends JavaFileObject> event) {
+        Level level;
         String prefix;
 
-        switch ( event.getKind() )
-        {
+        switch (event.getKind()) {
             case ERROR:
                 level  = Level.SEVERE;
                 prefix = "ERROR";
@@ -59,8 +59,7 @@ public class Diagnostics implements DiagnosticListener<JavaFileObject>
         SOFTLOG.log(level, "*** {0}: {1}", new Object[] {prefix, event.getMessage(null)} );
 
         if (event.getSource() != null)
-            SOFTLOG.log(level, "* At {0} ({1}:{2})", new Object[] {
-                event.getSource().getName(), event.getLineNumber(), event.getColumnNumber()
-            });
+            SOFTLOG.log(level, "* At {0} ({1}:{2})", new Object[] { event.getSource().getName(), event.getLineNumber(), event.getColumnNumber() });
     }
+
 }

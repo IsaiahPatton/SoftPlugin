@@ -30,40 +30,37 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import net.md_5.bungee.api.ChatColor;
+
 import java.util.logging.Logger;
 
 /**
  * Core singleton class of the SoftPlugin plugin. Initialization of important classes and plugin
  * code begins here.
  */
-public class SoftPlugin extends JavaPlugin
-{
-    /** Singleton instance of SoftPlugin, as created and run by Bukkit */
-    static SoftPlugin INSTANCE;
-    /** Singleton instance of SoftPlugin's logger, provided by Bukkit */
-    static Logger     SOFTLOG;
+public class SoftPlugin extends JavaPlugin {
 
-    private boolean     running;
+    protected static SoftPlugin INSTANCE; // Singleton instance of SoftPlugin, as created and run by Bukkit
+    protected static Logger SOFTLOG; // Singleton instance of SoftPlugin's logger, provided by Bukkit
+
+    private boolean running;
     private Diagnostics diagnostics;
-    private Compiler    compiler;
-    private Loader      loader;
+    private Compiler compiler;
+    private Loader loader;
 
     @Override
-    public void onLoad()
-    {
+    public void onLoad() {
         INSTANCE = this;
         SOFTLOG  = getLogger();
     }
 
     @Override
-    public void onEnable()
-    {
-        try
-        {
+    public void onEnable() {
+        try {
             Config.init();
 
             diagnostics = new Diagnostics();
-            compiler    = new Compiler(diagnostics);
+            compiler = new Compiler(diagnostics);
             compiler.compile();
 
             loader = new Loader();
@@ -71,39 +68,31 @@ public class SoftPlugin extends JavaPlugin
 
             running = true;
             SOFTLOG.info("Enabled; all code compiled and loaded");
-        }
-        catch (CompilerException e)
-        {
-            SOFTLOG.severe("*** One or more source files failed to compile. Please check the" +
-                           " diagnostic output above to identify any errors.");
-            SOFTLOG.severe("*** SoftPlugin will go idle and not load any code. If possible, try" +
-                           " fixing the build errors and then retry using `/softplugin-reload`");
+        } catch (CompilerException e) {
+            SOFTLOG.severe("*** One or more source files failed to compile. Please check the diagnostic output above to identify any errors.");
+            SOFTLOG.severe("*** SoftPlugin will go idle and not load any code. If possible, try fixing the build errors and then retry using `/softplugin-reload`");
 
             onDisable();
-        }
-        catch (RuntimeException e)
-        {
+        } catch (RuntimeException e) {
             SOFTLOG.severe("*** Plugin could not start because:");
             SOFTLOG.severe("* " + e);
             SOFTLOG.severe("* Inner exception: " + e.getCause() );
             SOFTLOG.severe("* Reported by: " + e.getStackTrace()[0].getClassName() );
-            SOFTLOG.severe("*** SoftPlugin will go idle and not load any code. If possible, try" +
-                           " fixing any config issues and then do `/softplugin-reload`");
+            SOFTLOG.severe("*** SoftPlugin will go idle and not load any code. If possible, try fixing any config issues and then do `/softplugin-reload`");
 
             onDisable();
         }
     }
 
     @Override
-    public void onDisable()
-    {
+    public void onDisable() {
         HandlerList.unregisterAll(this);
         Bukkit.getScheduler().cancelTasks(this);
 
-        running     = false;
+        running = false;
         diagnostics = null;
-        compiler    = null;
-        loader      = null;
+        compiler = null;
+        loader = null;
 
         // Force a garbage collect to try finalize and clean-up custom loaded classes
         System.gc();
@@ -112,14 +101,13 @@ public class SoftPlugin extends JavaPlugin
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
-    {
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         onDisable();
         onEnable();
 
         sender.sendMessage(running
-            ? "§7*** Reloaded SoftPlugin config & code"
-            : "§c*** Could not reload SoftPlugin; see console for errors"
+            ? ChatColor.GRAY + "*** Reloaded SoftPlugin config & code"
+            : ChatColor.RED + "*** Could not reload SoftPlugin; see console for errors"
         );
 
         return true;

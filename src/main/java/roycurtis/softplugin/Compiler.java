@@ -42,21 +42,21 @@ import java.util.stream.Stream;
 
 import static roycurtis.softplugin.SoftPlugin.SOFTLOG;
 
-/** Pipeline class that handles the discovery and compilation of Java source files */
-class Compiler
-{
-    /** Path to JAR that server's Bukkit API is running from, for classpath use */
-    private static final String BUKKIT_JAR = Bukkit.class
-        .getProtectionDomain().getCodeSource().getLocation().getPath();
+/**
+ * Pipeline class that handles the discovery and compilation of Java source files
+ */
+class Compiler {
 
-    private JavaCompiler    javac;
-    private Diagnostics     diagnostics;
+    // Path to JAR that server's Bukkit API is running from, for classpath use
+    private static final String BUKKIT_JAR = Bukkit.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+
+    private JavaCompiler javac;
+    private Diagnostics diagnostics;
     private ArrayList<File> sourceFiles;
 
-    Compiler(Diagnostics diagnostics)
-    {
+    Compiler(Diagnostics diagnostics) {
         // See http://stackoverflow.com/a/6052010/3354920
-        this.javac       = ToolProvider.getSystemJavaCompiler();
+        this.javac = ToolProvider.getSystemJavaCompiler();
         this.diagnostics = diagnostics;
 
         if (this.javac == null)
@@ -65,8 +65,7 @@ class Compiler
         SOFTLOG.fine("Compiler created");
     }
 
-    void compile()
-    {
+    void compile() {
         cleanCache();
         discoverFiles();
         compileFiles();
@@ -74,34 +73,31 @@ class Compiler
         SOFTLOG.fine("Compiler pipeline finished");
     }
 
-    /** Recursively looks for and deletes existing class files in the cache directory */
-    private void cleanCache()
-    {
-        try (Stream<Path> fileWalker = Files.walk(Config.Dirs.cache))
-        {
+    /**
+     * Recursively looks for and deletes existing class files in the cache directory
+     */
+    private void cleanCache() {
+        try (Stream<Path> fileWalker = Files.walk(Config.Dirs.cache)) {
             fileWalker
                 .filter(Files::isRegularFile)
                 .filter(path -> path.toString().endsWith(".class"))
                 .forEach(path -> {
-                    if ( path.toFile().delete() )
+                    if (path.toFile().delete())
                         SOFTLOG.finest("Deleted cached class file " + path);
-                    else
-                        throw new RuntimeException("Could not delete file " + path);
+                    else throw new RuntimeException("Could not delete file " + path);
                 });
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new RuntimeException("Could not clean cache", e);
         }
     }
 
-    /** Recursively looks for and collects any Java source files in the source directory */
-    private void discoverFiles()
-    {
+    /**
+     * Recursively looks for and collects any Java source files in the source directory
+     */
+    private void discoverFiles() {
         sourceFiles = new ArrayList<>();
 
-        try (Stream<Path> fileWalker = Files.walk(Config.Dirs.source))
-        {
+        try (Stream<Path> fileWalker = Files.walk(Config.Dirs.source)) {
             fileWalker
                 .filter(Files::isRegularFile)
                 .filter(path -> path.toString().endsWith(".java"))
@@ -111,51 +107,44 @@ class Compiler
                     SOFTLOG.finest("Discovered source file " + path);
                     sourceFiles.add(file);
                 });
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new RuntimeException("Could not discover source files", e);
         }
 
         int fileCount = sourceFiles.size();
         if (fileCount < 1)
             throw new RuntimeException("No source files were found to compile");
-        else
-            SOFTLOG.fine("Discovered source files: " + fileCount);
+        else SOFTLOG.fine("Discovered source files: " + fileCount);
     }
 
-    /** Attempts to compile all found source files into the cache directory, as class files */
-    private void compileFiles()
-    {
-        StandardJavaFileManager fileManager = javac.getStandardFileManager(
-            diagnostics, null, Charset.forName("UTF-8")
-        );
+    /**
+     * Attempts to compile all found source files into the cache directory, as class files
+     */
+    private void compileFiles() {
+        StandardJavaFileManager fileManager = javac.getStandardFileManager(diagnostics, null, Charset.forName("UTF-8"));
 
         // See https://docs.oracle.com/javase/8/docs/technotes/tools/windows/javac.html
         // and https://docs.oracle.com/javase/8/docs/technotes/tools/windows/classpath.html
-        List<String> options = Arrays.asList
-        (
-                    "-d", Config.Dirs.cache.toString(), // Built class output directory
-            "-classpath", generateClasspath(),          // Use Bukkit + plugins as classpath
-                "-Xlint"                                // Report all code warnings
+        List<String> options = Arrays.asList(
+            "-d", Config.Dirs.cache.toString(), // Built class output directory
+            "-classpath", generateClasspath(),  // Use Bukkit + plugins as classpath
+            "-Xlint"                            // Report all code warnings
         );
 
         SOFTLOG.info("Compiling " + sourceFiles.size() + " source files. . .");
 
-        CompilationTask task = javac.getTask(
-            null, fileManager, diagnostics, options, null,
-            fileManager.getJavaFileObjectsFromFiles(sourceFiles)
-        );
+        CompilationTask task = javac.getTask(null, fileManager, diagnostics, options, null, fileManager.getJavaFileObjectsFromFiles(sourceFiles));
 
-        if ( !task.call() )
+        if (!task.call())
             throw new CompilerException();
     }
 
-    /** Generates classpath string using paths of all plugins available and the Bukkit JAR */
-    private String generateClasspath()
-    {
-        File   pluginDir = new File("plugins/").getAbsoluteFile();
-        File[] plugins   = pluginDir.listFiles( new PatternFilenameFilter(".+\\.jar") );
+    /**
+     * Generates classpath string using paths of all plugins available and the Bukkit JAR
+     */
+    private String generateClasspath() {
+        File pluginDir = new File("plugins/").getAbsoluteFile();
+        File[] plugins = pluginDir.listFiles( new PatternFilenameFilter(".+\\.jar") );
         String classpath = BUKKIT_JAR;
 
         for (File plugin : plugins)
@@ -163,4 +152,5 @@ class Compiler
 
         return classpath;
     }
+
 }

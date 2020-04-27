@@ -34,28 +34,26 @@ import java.nio.file.Paths;
 import static roycurtis.softplugin.SoftPlugin.INSTANCE;
 import static roycurtis.softplugin.SoftPlugin.SOFTLOG;
 
-/** Static container class for SoftPlugin's configuration values */
-class Config
-{
-    static class Dirs
-    {
-        /** Directory where source files are to be found */
-        static Path source;
-        /** Directory where compiled class files are to be stored */
-        static Path cache;
+/**
+ * Static container class for SoftPlugin's configuration values
+ */
+public class Config {
+
+    protected static class Dirs {
+        protected static Path source; // Directory where source files are to be found
+        protected static Path cache; // Directory where compiled class files are to be stored
     }
 
-    static class Boot
-    {
-        /** Fully qualified name of class to attempt to load  */
-        static String className;
+    protected static class Boot {
+        static String className; // Fully qualified name of class to attempt to load
     }
 
     private static Configuration config;
 
-    /** Loads config from disk into this class' fields. Creates config file if not found. */
-    static void init()
-    {
+    /**
+     * Loads config from disk into this class' fields. Creates config file if not found.
+     */
+    protected static void init() {
         INSTANCE.saveDefaultConfig();
         INSTANCE.reloadConfig();
 
@@ -78,23 +76,20 @@ class Config
      * @param defValue Default value if config not set
      * @return Path reference of existing directory
      */
-    private static Path getOrCreatePath(String key, String defValue)
-    {
-        try
-        {
+    private static Path getOrCreatePath(String key, String defValue) {
+        try {
             String value = config.getString(key, defValue);
-            Path   path  = Paths.get(value);
+            Path path  = Paths.get(value);
 
             Files.createDirectories(path);
             SOFTLOG.fine("Path for `" + key + "` is valid: " + path);
 
             return path;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new RuntimeException("Could not get or create path", e);
         }
     }
 
-    private Config() { }
+    private Config() {}
+
 }
